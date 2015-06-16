@@ -5,12 +5,23 @@
 #include <iostream>
 using namespace System;
 
+enum Commands
+{
+	INSERT,
+	DELETE,
+	PLAY,
+	SHUFFLE,
+	CREATE
+};
+
 ref class UserInput
 {
 public:
-	String^ command;
+	Commands command;
 	int param1;
 	int param2;
+
+
 };
 
 int main()
@@ -22,7 +33,23 @@ int main()
 	do
 	{
 		input = Console::ReadLine();
-		array<String^>^ params = input->Split(' ');
+		UserInput parsedInput = parseUserInput(input);
+
+		switch (parsedInput.command)
+		{
+		case INSERT:
+			break;
+		case DELETE:
+			break;
+		case SHUFFLE:
+			break;
+		case PLAY:
+			break;
+		case CREATE:
+			break;
+		default:
+			break;
+		}
 
 		
 	} while (!input->Equals("exit"));
@@ -42,13 +69,47 @@ UserInput parseUserInput(String^ input)
 	array<String^>^ params = input->Split(' ');
 	if (params->Length > 0)
 	{
-		parsedInput.command = params[0];
-		if (parsedInput.command->Equals("create"))
+		String^ textComm = params[0];
+		if (textComm->Equals("create")
+			|| textComm->Equals("delete")
+			|| textComm->Equals("play"))
 		{
-			if (params->Length == 2 && (Int32::TryParse(params[1], parsedInput.param1)))
+			if (textComm->Equals("create"))
 			{
-				
+				parsedInput.command = CREATE;
+			}
+			else if (textComm->Equals("delete"))
+			{
+				parsedInput.command = DELETE;
+			}
+			else
+			{
+				parsedInput.command = PLAY;
+			}
+			bool val = (params->Length == 2) && (Int32::TryParse(params[1], parsedInput.param1));
+			if (!val)
+			{
+				throw gcnew ArgumentException("The inputs are not valid");
 			}
 		}
+		else if (textComm->Equals("shuffle"))
+		{
+			parsedInput.command = SHUFFLE;
+		}
+		else if (textComm->Equals("insert"))
+		{
+			parsedInput.command = INSERT;
+			bool val = (params->Length == 3) && (Int32::TryParse(params[1], parsedInput.param1)) && (Int32::TryParse(params[1], parsedInput.param2));
+			if (!val)
+			{
+				throw gcnew ArgumentException("The inputs are not valid");
+			}
+		}
+		else
+		{
+			throw gcnew ArgumentException("Invalid command provided");
+		}
 	}
+
+	return parsedInput;
 }
