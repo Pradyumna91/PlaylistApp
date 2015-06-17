@@ -118,46 +118,78 @@ void Playlist::insertTrackAtPosition(int position, int trackId)
 
 void Playlist::shuffle()
 {
-	Node* prefix = shuffle(1, currentlyPlayingTrackIndex - 1);						//Shuffling tracks before current playing track
-	Node* postfix = shuffle(currentlyPlayingTrackIndex + 1, totalNumberOfTracks);	//Shuffling tracks after current playing track
-
-	Node* preShufflingPlaylist = head;			//Preserving this to delete memory
-
-	//getting a reference to the currently playing song and deleting the playlist
-	Node* currentlyPlayingNode;
-	for (int i = 1; i <= totalNumberOfTracks; i++)
+	if (totalNumberOfTracks <= 1)
 	{
-		Node* curNode = preShufflingPlaylist;
-		if (i == currentlyPlayingTrackIndex)
+		if (totalNumberOfTracks < 1)
 		{
-			currentlyPlayingNode = curNode;
+			throw gcnew System::InvalidOperationException("cannot shuffle an empty playlist");
 		}
-		preShufflingPlaylist = preShufflingPlaylist->next;
-		delete curNode;
-	}
 
-	//Merging the 2 halves of the playlist
-	head = prefix;
-	Node* tail = head;
-	while (tail->next != nullptr)
+		//if the playlist contains only one track it cannot be shuffled and hence displaying it directly at the end
+	}
+	else
 	{
-		tail = tail->next;
-	}
+		Node* prefix = shuffle(1, currentlyPlayingTrackIndex - 1);						//Shuffling tracks before current playing track
+		Node* postfix = shuffle(currentlyPlayingTrackIndex + 1, totalNumberOfTracks);	//Shuffling tracks after current playing track
 
-	tail->next = currentlyPlayingNode;
-	currentlyPlayingNode->next = postfix;
+		Node* preShufflingPlaylist = head;			//Preserving this to delete memory
+
+		//getting a reference to the currently playing song and deleting the playlist
+		Node* currentlyPlayingNode;
+		for (int i = 1; i <= totalNumberOfTracks; i++)
+		{
+			Node* curNode = preShufflingPlaylist;
+			if (i == currentlyPlayingTrackIndex)
+			{
+				currentlyPlayingNode = curNode;
+				preShufflingPlaylist = preShufflingPlaylist->next;	//Not deleting the currently playing node
+				continue;
+			}
+			preShufflingPlaylist = preShufflingPlaylist->next;
+			delete curNode;
+		}
+
+		//Merging the 2 halves of the playlist along with the currently playing node
+		if (prefix == nullptr)
+		{
+			head = currentlyPlayingNode;
+			head->next = postfix;
+		}
+		else
+		{
+			head = prefix;
+			Node* tail = head;
+			while (tail->next != nullptr)
+			{
+				tail = tail->next;
+			}
+
+			tail->next = currentlyPlayingNode;
+			currentlyPlayingNode->next = postfix;
+		}
+	}
 
 	displayPlaylist();
 }
 
 Node* Playlist::shuffle(int startIndex, int endIndex)
 {
+	if (endIndex < startIndex)
+	{
+		return nullptr;
+	}
+
 	System::Random^ rand = gcnew System::Random();
 	const int size = (endIndex - startIndex) + 1;
 	int* ar = new int[size];
 
 	Node* curNode = head;
-	for (int i = startIndex, int j = 0; i <= endIndex; i++, j++, curNode = curNode->next)
+	for (int i = 1; i < startIndex; i++)
+	{
+		curNode = curNode->next;
+	}
+
+	for (int i = startIndex, j = 0; i <= endIndex; i++, j++, curNode = curNode->next)
 	{
 		ar[j] = curNode->item;
 	}
@@ -172,13 +204,13 @@ Node* Playlist::shuffle(int startIndex, int endIndex)
 	}
 
 	Node* shuffledList = new Node();
-	Node* curNode = shuffledList;
+	curNode = shuffledList;
 	for (int i = 0; i < size - 1; i++, curNode = curNode->next)
 	{
 		curNode->item = ar[i];
 		curNode->next = new Node();
 	}
-	curNode->item = ar[size - 1];					//Ading the last element
+	curNode->item = ar[size - 1];					//Adding the last element
 	curNode->next = nullptr;
 
 	return shuffledList;

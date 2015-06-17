@@ -51,17 +51,11 @@ int main()
 				break;
 			}
 		}
-		catch (ArgumentException^ e)
+		catch (Exception^ e)
 		{
 			Console::WriteLine(e->Message);
 		}
 
 		input = Console::ReadLine();
 	} 
-
-	/*playlist.create(5);
-	playlist.playTrack(3);
-	playlist.insertTrackAtPosition(2, 5);
-	playlist.deleteTrackAtPosition(3);
-	playlist.deleteTrackAtPosition(3);*/
 }
