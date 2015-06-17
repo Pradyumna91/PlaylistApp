@@ -14,6 +14,8 @@ private:
 	int totalNumberOfTracks;
 
 	void displayPlaylist();
+	Node* shuffle(int startIndex, int endIndex);
+
 public:
 	Playlist();
 	void create(int numberOfTracks);
