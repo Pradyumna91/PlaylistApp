@@ -90,7 +90,11 @@ void Playlist::insertTrackAtPosition(int position, int trackId, bool isAddingNew
 	Node* nodeToBeInserted = new Node();
 	nodeToBeInserted->item = trackId;
 
-	if (position > (totalNumberOfTracks + 1))				//Adding one to allow the user to add a track at the end of the playlist
+	if (head == nullptr)
+	{
+		throw gcnew System::InvalidOperationException("Cannot insert in an empty playlist");
+	}
+	else if (position > (totalNumberOfTracks + 1))				//Adding one to allow the user to add a track at the end of the playlist
 	{
 		throw gcnew System::ArgumentException("Invalid position for track insertion");
 	}

@@ -51,7 +51,11 @@ int main()
 				break;
 			}
 		}
-		catch (Exception^ e)
+		catch (ArgumentException^ e)
+		{
+			Console::WriteLine(e->Message);
+		}
+		catch (InvalidOperationException^ e)
 		{
 			Console::WriteLine(e->Message);
 		}
