@@ -56,10 +56,9 @@ void Playlist::deleteTrackAtPosition(int position)
 	}
 	else
 	{
-		while (position > 2)
+		for (int i = position; i > 2; --i)
 		{
 			curNode = curNode->next;
-			--position;
 		}
 
 		trackToBeDeleted = curNode->next;
@@ -98,10 +97,9 @@ void Playlist::insertTrackAtPosition(int position, int trackId)
 	else
 	{
 		Node* curNode = head;
-		while (position > 2)
+		for (int i = position; i > 2; --i)
 		{
 			curNode = curNode->next;
-			--position;
 		}
 
 		nodeToBeInserted->next = curNode->next;
