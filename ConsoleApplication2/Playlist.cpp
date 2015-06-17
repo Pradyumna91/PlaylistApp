@@ -213,6 +213,7 @@ Node* Playlist::shuffle(int startIndex, int endIndex)
 	curNode->item = ar[size - 1];					//Adding the last element
 	curNode->next = nullptr;
 
+	delete ar;
 	return shuffledList;
 }
 
