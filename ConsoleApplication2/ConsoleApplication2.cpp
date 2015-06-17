@@ -33,7 +33,7 @@ int main()
 			switch (parsedInput->command)
 			{
 			case INSERT:
-				playlist.insertTrackAtPosition(parsedInput->param1, parsedInput->param2);
+				playlist.insertTrackAtPosition(parsedInput->param1, parsedInput->param2, true);
 				break;
 			case DELETE:
 				playlist.deleteTrackAtPosition(parsedInput->param1);

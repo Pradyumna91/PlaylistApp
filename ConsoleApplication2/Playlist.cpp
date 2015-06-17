@@ -9,12 +9,11 @@ Playlist::Playlist()
 	currentlyPlayingTrackIndex = -1;				//-1 means no track is currently playing
 }
 
-void Playlist::create(int numberOfTracks)
+void Playlist::clearPlaylist(Node* root)
 {
-	//deleting any existing playlist
-	if (head != nullptr)
+	if (root != nullptr)
 	{
-		Node* curNode = head;
+		Node* curNode = root;
 		while (curNode != nullptr)
 		{
 			Node* node = curNode;
@@ -22,6 +21,12 @@ void Playlist::create(int numberOfTracks)
 			delete node;
 		}
 	}
+}
+
+void Playlist::create(int numberOfTracks)
+{
+	//deleting any existing playlist
+	clearPlaylist(head);
 
 	head = new Node();
 	Node* curNode = head;
@@ -80,7 +85,7 @@ void Playlist::deleteTrackAtPosition(int position)
 	displayPlaylist();
 }
 
-void Playlist::insertTrackAtPosition(int position, int trackId)
+void Playlist::insertTrackAtPosition(int position, int trackId, bool isAddingNewTrackToPlaylist)
 {
 	Node* nodeToBeInserted = new Node();
 	nodeToBeInserted->item = trackId;
@@ -106,14 +111,17 @@ void Playlist::insertTrackAtPosition(int position, int trackId)
 		curNode->next = nodeToBeInserted;
 	}
 
-	if (position <= currentlyPlayingTrackIndex)
+	//Incrementing the counts only when a new track is being added and not when track is added during shuffling
+	if (isAddingNewTrackToPlaylist)
 	{
-		++currentlyPlayingTrackIndex;
+		if (position <= currentlyPlayingTrackIndex)
+		{
+			++currentlyPlayingTrackIndex;
+		}
+		++totalNumberOfTracks;
+
+		displayPlaylist();
 	}
-
-	++totalNumberOfTracks;
-
-	displayPlaylist();
 }
 
 void Playlist::shuffle()
@@ -127,73 +135,49 @@ void Playlist::shuffle()
 
 		//if the playlist contains only one track it cannot be shuffled and hence displaying it directly at the end
 	}
+	else if (currentlyPlayingTrackIndex == -1)
+	{
+		Node* preShufflingPlaylist = head;
+		int *ar = new int[totalNumberOfTracks];
+		Node* curNode = head;
+		for (int i = 0; i < totalNumberOfTracks; i++, curNode = curNode->next)
+		{
+			ar[i] = curNode->item;
+		}
+		head = shuffle(ar, totalNumberOfTracks);
+		clearPlaylist(preShufflingPlaylist);
+	}
 	else
 	{
-		Node* prefix = shuffle(1, currentlyPlayingTrackIndex - 1);						//Shuffling tracks before current playing track
-		Node* postfix = shuffle(currentlyPlayingTrackIndex + 1, totalNumberOfTracks);	//Shuffling tracks after current playing track
+		int currentlyPlayingItem;
+		int *ar = new int[totalNumberOfTracks - 1];
+		Node* curNode = head;
 
-		Node* preShufflingPlaylist = head;			//Preserving this to delete memory
-
-		//getting a reference to the currently playing song and deleting the playlist
-		Node* currentlyPlayingNode;
-		for (int i = 1; i <= totalNumberOfTracks; i++)
+		for (int i = 1, j = 0; i <= totalNumberOfTracks; i++, curNode = curNode->next)
 		{
-			Node* curNode = preShufflingPlaylist;
 			if (i == currentlyPlayingTrackIndex)
 			{
-				currentlyPlayingNode = curNode;
-				preShufflingPlaylist = preShufflingPlaylist->next;	//Not deleting the currently playing node
+				currentlyPlayingItem = curNode->item;
 				continue;
 			}
-			preShufflingPlaylist = preShufflingPlaylist->next;
-			delete curNode;
+			ar[j] = curNode->item;
+			j = j + 1;
 		}
 
-		//Merging the 2 halves of the playlist along with the currently playing node
-		if (prefix == nullptr)
-		{
-			head = currentlyPlayingNode;
-			head->next = postfix;
-		}
-		else
-		{
-			head = prefix;
-			Node* tail = head;
-			while (tail->next != nullptr)
-			{
-				tail = tail->next;
-			}
-
-			tail->next = currentlyPlayingNode;
-			currentlyPlayingNode->next = postfix;
-		}
+		Node* shuffledList = shuffle(ar, totalNumberOfTracks - 1);
+		clearPlaylist(head);
+		head = shuffledList;
+		//Inserting the currently playing item into its position
+		insertTrackAtPosition(currentlyPlayingTrackIndex, currentlyPlayingItem, false);
 	}
 
 	displayPlaylist();
 }
 
-Node* Playlist::shuffle(int startIndex, int endIndex)
+Node* Playlist::shuffle(int* ar, int size)
 {
-	if (endIndex < startIndex)
-	{
-		return nullptr;
-	}
-
 	System::Random^ rand = gcnew System::Random();
-	const int size = (endIndex - startIndex) + 1;
-	int* ar = new int[size];
-
-	Node* curNode = head;
-	for (int i = 1; i < startIndex; i++)
-	{
-		curNode = curNode->next;
-	}
-
-	for (int i = startIndex, j = 0; i <= endIndex; i++, j++, curNode = curNode->next)
-	{
-		ar[j] = curNode->item;
-	}
-
+	
 	//Fisher-Yates shuffle
 	for (int i = size - 1; i >= 1; i--)
 	{
@@ -204,7 +188,7 @@ Node* Playlist::shuffle(int startIndex, int endIndex)
 	}
 
 	Node* shuffledList = new Node();
-	curNode = shuffledList;
+	Node* curNode = shuffledList;
 	for (int i = 0; i < size - 1; i++, curNode = curNode->next)
 	{
 		curNode->item = ar[i];
@@ -213,7 +197,6 @@ Node* Playlist::shuffle(int startIndex, int endIndex)
 	curNode->item = ar[size - 1];					//Adding the last element
 	curNode->next = nullptr;
 
-	delete ar;
 	return shuffledList;
 }
 

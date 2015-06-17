@@ -14,13 +14,14 @@ private:
 	int totalNumberOfTracks;
 
 	void displayPlaylist();
-	Node* shuffle(int startIndex, int endIndex);
+	Node* shuffle(int*, int size);
+	void clearPlaylist(Node* head);
 
 public:
 	Playlist();
 	void create(int numberOfTracks);
 	void deleteTrackAtPosition(int position);
-	void insertTrackAtPosition(int position, int trackId);
+	void insertTrackAtPosition(int position, int trackId, bool isAddingNewTrackToPlaylist);
 	void shuffle();
 	void playTrack(int position);
 	
